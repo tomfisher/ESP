@@ -41,11 +41,6 @@ script:
       xcodebuild -configuration Release -target ESP -project "Xcode/ESP/ESP.xcodeproj"
     fi
 
-after_success
-  - >
-    if [ "$BUILD_TOOL" = "CMake" ]; then
-      ./update-doc.sh
-    fi
 cache:
   directories:
     - third-party/openFrameworks/libs
