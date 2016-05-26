@@ -26,6 +26,8 @@ before_script:
   # CMake
   - >
     if [ "$BUILD_TOOL" = "CMake" ]; then
+      # Install Doxygen
+      brew update && brew install doxygen
       mkdir build
       cd build
       cmake ..
