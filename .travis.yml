@@ -34,10 +34,17 @@ script:
   - >
     if [ "$BUILD_TOOL" = "CMake" ]; then
       make;
+      make doc;
     fi;
   - >
     if [ "$BUILD_TOOL" = "Xcode" ]; then
       xcodebuild -configuration Release -target ESP -project "Xcode/ESP/ESP.xcodeproj"
+    fi
+
+after_success
+  - >
+    if [ "$BUILD_TOOL" = "CMake" ]; then
+      ./update-doc.sh
     fi
 cache:
   directories:
