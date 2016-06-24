@@ -166,6 +166,7 @@ endif(DOXYGEN_FOUND)
 add_executable(
   MFCC-test
   ${ESP_PATH}/test/MFCC-test.cpp
+  ${ESP_PATH}/src/MFCC.cpp
   )
 
 target_include_directories(
@@ -178,6 +179,7 @@ target_include_directories(
 target_link_libraries(
   MFCC-test
   PUBLIC
+  ${ESP_LIBS}
   ${GRT_LIBRARY}
   ${SYS_LIBS}
   )

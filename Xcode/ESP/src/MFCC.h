@@ -7,16 +7,18 @@ namespace GRT {
 
 class MelBank {
   public:
-    MelBank(uint32_t left, uint32_t middle, uint32_t right, uint32_t size) {
+    MelBank(double left, double middle, double right, uint32_t fs, uint32_t size) {
         filter_.resize(size);
+        double unit = 1.0f * fs / 2 / (size - 1);
         for (uint32_t i = 0; i < size; i++) {
-            if (i <= left) {
+            double f = unit * i;
+            if (f <= left) {
                 filter_[i] = 0;
-            } else if (left < i && i <= middle) {
-                filter_[i] = 1.0f * (i - left) / (middle - left);
-            } else if (middle < i && i <= right) {
-                filter_[i] = 1.0f * (right - i) / (right - middle);
-            } else if (right < i) {
+            } else if (left < f && f <= middle) {
+                filter_[i] = 1.0f * (f - left) / (middle - left);
+            } else if (middle < f && f <= right) {
+                filter_[i] = 1.0f * (right - f) / (right - middle);
+            } else if (right < f) {
                 filter_[i] = 0;
             } else {
                 assert(false && "MelBank argument wrong or implementation bug");
@@ -42,6 +44,10 @@ class MelBank {
 
     static inline double fromMelScale(double mel_freq) {
         return 700.0f * (exp(mel_freq / 1127.0f) - 1.0f);
+    }
+
+    vector<double>& getFilter() {
+        return filter_;
     }
 
   private:

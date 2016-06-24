@@ -30,19 +30,18 @@ MFCC::MFCC(double startFreq, double endFreq,
     numInputDimensions = FFTSize;
     numOutputDimensions = numLowerFeatures;
 
-    vector<double> index(numFilterBanks + 2);
-
+    vector<double> freqs(numFilterBanks + 2);
     double mel_start = MelBank::toMelScale(startFreq);
     double mel_end = MelBank::toMelScale(endFreq);
     double mel_step = (mel_end - mel_start) / (numFilterBanks + 1);
+
     for (uint32_t i = 0; i < numFilterBanks + 2; i++) {
-        double freq = MelBank::fromMelScale(mel_start + i * mel_step);
-        index[i] = floor(freq * (FFTSize + 1) / sampleRate);
+        freqs[i] = MelBank::fromMelScale(mel_start + i * mel_step);
     }
 
     for (uint32_t i = 0; i < numFilterBanks; i++) {
         filters_.push_back(
-            MelBank(index[i], index[i + 1], index[i + 2], FFTSize));
+            MelBank(freqs[i], freqs[i + 1], freqs[i + 2], sampleRate, FFTSize));
     }
 
     initialized_ = true;

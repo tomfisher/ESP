@@ -12,6 +12,22 @@ const uint32_t kMFCCFeatureDim = 13;
 const uint32_t kMFCCFrameCount = 265;
 const uint32_t kSampleRate = 16000;
 
+#define EXPECT_CLOSE_VEC(a, b, eps)                         \
+    for (auto ai = (a).begin(), bi = (b).begin();           \
+         ai != (a).end() && bi != (b).end(); ++ai, ++bi) {  \
+        if (abs(*ai - *bi) > eps) {                         \
+            std::cerr << "diff(" << *ai << ", " << *bi      \
+                      << ") > " << eps << std::endl;        \
+            assert(false);                                  \
+        }                                                   \
+    }
+
+#define EXPECT_EQ(a, b)                                 \
+    if ((a) != (b)) {                                   \
+        std::cerr << (a) << " != " << (b) << std::endl; \
+        assert(false);                                  \
+    }
+
 vector<string> split(string str, char delimiter);
 GRT::MatrixDouble readCSVToMatrix(const string& filename, uint32_t row, uint32_t col);
 
@@ -24,25 +40,45 @@ int main(int argc, const char* argv[]) {
 
     std::string dir = argv[1];
 
+    // FFT MAG: 257, 264
+    // FBE: 20, 264
+    // CC: 13, 264
     GRT::MatrixDouble fft = readCSVToMatrix(dir + "fft.csv", 257, 264);
     GRT::MatrixDouble fbe = readCSVToMatrix(dir + "fbe.csv", 20, 264);
+    GRT::MatrixDouble cc = readCSVToMatrix(dir + "cc.csv", 13, 264);
 
-    // 3. Construct the simple pipeline
+    GRT::MFCC mfcc(300, 3700, 257, kSampleRate, 20, 13);
+
+    // Step 1. triangle filter
+    vector<GRT::MelBank> filters = mfcc.getFilters();
+
+    vector<double> filter = filters[0].getFilter();
+    uint32_t M = filters.size();
+
+    uint32_t col = 0;
+    GRT::VectorDouble fft_frame = fft.getColVector(col);
+    GRT::VectorDouble my_fbe(M);
+    for (uint32_t i = 0; i < M; i++) {
+        double energy = filters[i].filter(fft_frame);
+        if (energy == 0) {
+            // Prevent log_energy goes to -inf...
+            my_fbe[i] = 0;
+        } else {
+            my_fbe[i] = log(energy);
+        }
+    }
+
+    GRT::VectorDouble their_fbe = fbe.getColVector(col);
+    EXPECT_CLOSE_VEC(my_fbe, their_fbe, 0.01);
+
+    // Step 2. IDCT
+    // TODO
+
+    std::cout << "Passed" << std::endl;
     return 0;
 }
 
-// FFT MAG: 257, 264
-// FBE: 20, 264
-// CC: 13, 264
-
-#define EXPECT_EQ(a, b) \
-    if ((a) != (b)) {                           \
-        std::cerr << (a) << " != " << (b) << std::endl; \
-        assert(false);                                  \
-    }
-
 GRT::MatrixDouble readCSVToMatrix(const string& filename, uint32_t row, uint32_t col) {
-    std::cerr << "Reading file: " << filename << std::endl;
     GRT::MatrixDouble mat(row, col);
     std::ifstream file(filename);
     uint32_t r = 0, c = 0;
