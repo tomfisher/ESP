@@ -37,30 +37,30 @@ class MelBank {
     }
 
     static inline double toMelScale(double freq) {
-        return 1125.0f * log(1.0f + freq / 700.0f);
+        return 1127.0f * log(1.0f + freq / 700.0f);
     }
 
     static inline double fromMelScale(double mel_freq) {
-        return 700.0f * (exp(mel_freq / 1125.0f) - 1.0f);
+        return 700.0f * (exp(mel_freq / 1127.0f) - 1.0f);
     }
 
   private:
     vector<double> filter_;
 };
 
-class MelBankFeatures : public FeatureExtraction {
+class MFCC : public FeatureExtraction {
   public:
-    MelBankFeatures(double startFreq = -1,
-                    double endFreq = -1,
-                    uint32_t FFTSize = -1,
-                    uint32_t sampleRate = -1,
-                    uint32_t numFilterBanks = 26,
-                    uint32_t numLowerFeatures = 12,
-                    bool withDelta = false);
-    MelBankFeatures(const MelBankFeatures &rhs);
-    MelBankFeatures& operator=(const MelBankFeatures &rhs);
+    MFCC(double startFreq = -1,
+         double endFreq = -1,
+         uint32_t FFTSize = -1,
+         uint32_t sampleRate = -1,
+         uint32_t numFilterBanks = 26,
+         uint32_t numLowerFeatures = 12,
+         bool withDelta = false);
+    MFCC(const MFCC &rhs);
+    MFCC& operator=(const MFCC &rhs);
     bool deepCopyFrom(const FeatureExtraction *featureExtraction) override;
-    ~MelBankFeatures() {}
+    ~MFCC() {}
 
     virtual bool computeFeatures(const VectorDouble &inputVector) override;
     virtual bool reset() override;
@@ -80,7 +80,7 @@ class MelBankFeatures : public FeatureExtraction {
 
     vector<MelBank> filters_;
 
-    static RegisterFeatureExtractionModule<MelBankFeatures> registerModule;
+    static RegisterFeatureExtractionModule<MFCC> registerModule;
 };
 
 }  // namespace GRT

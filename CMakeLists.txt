@@ -159,3 +159,25 @@ if(DOXYGEN_FOUND)
     comment "Generating API documentation with Doxygen" VERBATIM
     )
 endif(DOXYGEN_FOUND)
+
+# =============================================================
+#    Test
+# =============================================================
+add_executable(
+  MFCC-test
+  ${ESP_PATH}/test/MFCC-test.cpp
+  )
+
+target_include_directories(
+  MFCC-test
+  PUBLIC
+  ${ESP_PATH}/src
+  ${GRT_INCLUDE_DIR}
+  )
+
+target_link_libraries(
+  MFCC-test
+  PUBLIC
+  ${GRT_LIBRARY}
+  ${SYS_LIBS}
+  )
